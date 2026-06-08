@@ -1,0 +1,63 @@
+# ----------------------------------------
+# Events: Event name
+# ----------------------------------------
+# 
+# All Users
+# Start date: 20260511
+# End date: 20260607
+Event name,Event count,Total users,Event count per active user,Total revenue
+Apps_Error,58567,571,103.29276895943562,0
+screen_view,32782,803,41.97439180537772,0
+user_engagement,8995,761,11.819973718791065,0
+Syncing_Attempt,8767,248,35.63821138211382,0
+Sign_Up_Step,5371,273,19.673992673992675,0
+Connect_Attempt,4493,144,31.640845070422536,0
+session_start,3629,838,4.634738186462324,0
+Syncing_Start,2963,165,17.957575757575757,0
+Finish_Syncing,1691,68,24.86764705882353,0
+notification_receive,1409,141,12.469026548672566,0
+Syncing_Error,1212,126,9.696,0
+Invoked_Action,1064,93,11.440860215053764,0
+notification_dismiss,561,79,11,0
+notification_foreground,506,94,5.382978723404255,0
+first_open,480,480,1,0
+sign_up,430,277,1.552346570397112,0
+app_remove,368,342,1.4045801526717556,0
+login,325,157,2.070063694267516,0
+Invoked_Action_On_Sync,284,54,5.2592592592592595,0
+Start_AI_Glucose_Scan,254,37,6.864864864864865,0
+Open_Workout_Selection,121,28,4.321428571428571,0
+Meal_Journal_Saved,88,15,5.866666666666666,0
+Sense_2_Success_Measurement,79,18,4.388888888888889,0
+Add_Meal_Journal,73,10,7.3,0
+Sense_2_Generate_PDF_Report,53,16,3.3125,0
+os_update,40,40,4,0
+Post_Meal_Scan_Nudge,39,4,9.75,0
+notification_open,39,23,1.6956521739130435,0
+Input_Meal_Journal_Desc,28,13,2.1538461538461537,0
+Start_Vo2Max,28,13,2.1538461538461537,0
+Start_Quick_Check_HR,25,13,1.9230769230769231,0
+End_Quick_Check_HR,24,13,1.8461538461538463,0
+Sleep_Report_View,23,6,3.8333333333333335,0
+Set_Monitoring_Setting,21,12,1.75,0
+Start_Quick_Check_SpO2,21,10,2.1,0
+AI_Glucose_Setup_show_prompt,20,18,1.1111111111111112,0
+Morning_Glucose_Check,19,5,4.75,0
+Sign_Up_Error,19,2,9.5,0
+app_update,17,15,1.8888888888888888,0
+AI_Glucose_Setup_open_family_history,16,16,1,0
+AI_Glucose_Setup_finish_set_up,15,15,1,0
+Meal_Journal_Discarded,14,8,1.75,0
+AI_Glucose_Scan_Lapsed_Reminder,13,5,4.333333333333333,0
+AI_Glucose_Setup_dismiss_prompt,11,8,1.375,0
+AI_Glucose_Setup_from_prompt,10,10,1,0
+app_clear_data,9,9,1.2857142857142858,0
+AI_Glucose_Setup_from_check_it_out,7,6,1.1666666666666667,0
+Create_New_Tag,6,3,2,0
+Sense_Success_Measurement,6,5,1.2,0
+Edit_Meal_Journal,5,2,2.5,0
+AI_Glucose_Setup_close_set_up,3,3,1,0
+Ring_Not_Sync_Reminder,3,1,3,0
+share,3,2,1.5,0
+First_AI_Glucose_Scan,2,2,1,0
+AI_Glucose_Setup_from_floating_button,1,1,1,0

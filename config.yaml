@@ -1,0 +1,55 @@
+# ─────────────────────────────────────────────────────────────
+# FIREBASE ANALYTICS — MODEL CONFIG
+# ─────────────────────────────────────────────────────────────
+# Set provider to: local | anthropic | openai | gemini | groq
+#
+# parser  = lightweight model used to NAME csv sections
+# insight = stronger model used to ANALYSE and REPORT
+# ─────────────────────────────────────────────────────────────
+
+parser:
+  provider: local
+  model: "./models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+  max_tokens: 15
+  temperature: 0.0
+  n_ctx: 2048
+
+insight:
+  provider: groq              # switch to: local | anthropic | openai | gemini | groq
+  model: llama-3.3-70b-versatile   # optional; defaults per provider if omitted
+  api_key_env: GROQ_API_KEY        # optional; defaults per provider if omitted
+  section_max_tokens: 200
+  max_tokens: 800             # final report length
+  temperature: 0.1
+  request_delay_seconds: 0
+  max_retries: 3
+  retry_base_delay_seconds: 30
+
+# ── Local model options ────────────────────────────────────────
+# provider: local
+# model: "./models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+# n_ctx: 4096
+# n_gpu_layers: -1
+
+# ── Anthropic options ──────────────────────────────────────────
+# provider: anthropic
+# model: claude-sonnet-4-20250514
+# api_key_env: ANTHROPIC_API_KEY
+# base_url: https://api.anthropic.com
+
+# ── OpenAI options ─────────────────────────────────────────────
+# provider: openai
+# model: gpt-4o-mini
+# api_key_env: OPENAI_API_KEY
+# base_url: https://api.openai.com/v1
+
+# ── Gemini options ─────────────────────────────────────────────
+# provider: gemini
+# model: gemini-2.5-flash
+# api_key_env: GEMINI_API_KEY
+
+# ── Groq options ───────────────────────────────────────────────
+# provider: groq
+# model: llama-3.3-70b-versatile
+# api_key_env: GROQ_API_KEY
+# base_url: https://api.groq.com/openai/v1

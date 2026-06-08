@@ -1,0 +1,11 @@
+# Core
+pyyaml
+
+# Local models
+llama-cpp-python
+huggingface-hub
+
+# API providers
+anthropic        # provider: anthropic
+openai           # provider: openai
+google-genai     # provider: gemini
