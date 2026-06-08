@@ -1,8 +1,8 @@
 # Firebase Analytics Insights Pipeline
 
-A configurable Python pipeline for parsing Firebase Analytics CSV exports and
-generating model-based insights. The parser model and insight model are chosen
-independently in `config.yaml`, while API keys stay in `.env`.
+A configurable Python pipeline for parsing Firebase Analytics CSV exports,
+computing deterministic Pandas metrics, and using one LLM call to generate the
+final report. API keys stay in `.env`.
 
 ## Project Structure
 
@@ -11,8 +11,8 @@ firebase_analytics/
 ├── analytics.py           # main entry point
 ├── app_config.py          # config.yaml and .env loading helpers
 ├── config.yaml            # provider/model settings
-├── csv_parser.py          # splits CSV exports into named sections
-├── insights.py            # section analysis and final report generation
+├── metrics.py             # section parsing plus Pandas metric computation
+├── insights.py            # one-call report generation
 ├── requirements.txt
 └── providers/
     ├── __init__.py        # provider factory
@@ -36,6 +36,7 @@ Install only the provider packages you need if you prefer a smaller environment:
 
 ```bash
 pip install pyyaml
+pip install pandas                              # metrics
 pip install llama-cpp-python huggingface-hub   # local
 pip install anthropic                          # anthropic
 pip install openai                             # openai or groq
@@ -63,28 +64,19 @@ Gemini also accepts the older `GOOGLEGEMINI_API_KEY` alias for compatibility.
 All provider and model switching happens in `config.yaml`.
 
 ```yaml
-parser:
-  provider: local
-  model: "./models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
-  max_tokens: 15
-  temperature: 0.0
-  n_ctx: 2048
-
 insight:
   provider: groq
   model: llama-3.3-70b-versatile   # optional; defaults per provider
   api_key_env: GROQ_API_KEY        # optional; defaults per provider
-  section_max_tokens: 200
-  max_tokens: 800
+  max_tokens: 1000
   temperature: 0.1
-  request_delay_seconds: 0
   max_retries: 3
   retry_base_delay_seconds: 30
+  max_prompt_chars: 14000
 ```
 
-`parser` is used only to name unnamed CSV sections, so a small local model is
-usually enough. `insight` analyzes each section and writes the final report, so
-use the stronger or cheaper service you prefer there.
+Pandas parses Firebase's sectioned CSV format and computes the metrics locally.
+`insight` receives one compact JSON metrics brief and writes the final report.
 
 Common fields:
 
@@ -93,13 +85,12 @@ Common fields:
 | `provider` | all | `local`, `anthropic`, `openai`, `gemini`, or `groq` |
 | `model` | all | Optional for cloud providers; API model name or local GGUF path |
 | `temperature` | all | Sampling temperature |
-| `max_tokens` | parser, insight | Parser title length or final report length |
-| `section_max_tokens` | insight | Per-section analysis length |
+| `max_tokens` | insight | Final report length |
 | `api_key_env` | API providers | Name of the env var containing the API key |
 | `base_url` | anthropic, openai, groq | Optional API/proxy endpoint override |
-| `request_delay_seconds` | insight | Pause between insight calls to stay under RPM limits |
 | `max_retries` | insight | Number of retries after rate-limit or transient API errors |
 | `retry_base_delay_seconds` | insight | Fallback retry delay when the API does not provide one |
+| `max_prompt_chars` | insight | Trims the LLM metrics payload to stay under provider request limits |
 | `n_ctx`, `n_gpu_layers`, `n_batch`, `n_threads` | local | llama-cpp-python runtime settings |
 
 ## Provider Defaults
@@ -124,7 +115,6 @@ Local model:
 insight:
   provider: local
   model: "./models/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf"
-  section_max_tokens: 200
   max_tokens: 800
   temperature: 0.1
   n_ctx: 4096
@@ -227,10 +217,10 @@ python3 analytics.py ./data/Events_Event_name.csv --config my_config.yaml
 Pipeline steps:
 
 1. Load `config.yaml` and `.env`.
-2. Build the parser and insight providers from config.
-3. Parse the CSV into sections.
-4. Use the parser model to label unnamed sections.
-5. Use the insight model for section analysis and the final report.
+2. Parse the Firebase CSV into Pandas DataFrames.
+3. Compute deterministic metrics, warnings, proxy event ratios, segments, and trend signals.
+4. Send one compact metrics brief to the insight model.
+5. Print the final report.
 
 ## Custom Models And APIs
 
@@ -266,7 +256,7 @@ Groq is implemented this way internally, except it has a convenience
 Use this path for local models that work with `llama-cpp-python`.
 
 1. Put the `.gguf` file under `models/`.
-2. Point either `parser` or `insight` at that file.
+2. Point `insight` at that file.
 
 ```yaml
 insight:
@@ -371,9 +361,9 @@ that exact variable name.
 Gemini 429 quota error:
 
 ```text
-The free tier can allow only a few requests per minute. Keep
-request_delay_seconds at 13 or higher, or switch insight.provider to a paid
-provider/key with a higher quota.
+The free tier can allow only a few requests per day or minute. This pipeline now
+uses one LLM call, but you may still need to wait for quota reset or switch
+`insight.provider` to a provider/key with available quota.
 ```
 
 Local model fails to load:
@@ -386,6 +376,6 @@ or switch that role to an API provider.
 No sections found:
 
 ```text
-The parser expects sections separated by blank lines, optional titles starting
-with #, and a header row at the start of each section.
+The metrics parser expects sections separated by blank lines, optional titles
+starting with #, and a header row at the start of each section.
 ```

@@ -66,7 +66,7 @@ def completion_options(
 
 def runtime_options(cfg: dict[str, Any]) -> dict[str, Any]:
     return {
-        "request_delay_seconds": float(cfg.get("request_delay_seconds", 0.0)),
         "max_retries": int(cfg.get("max_retries", 0)),
         "retry_base_delay_seconds": float(cfg.get("retry_base_delay_seconds", 30.0)),
+        "max_prompt_chars": int(cfg.get("max_prompt_chars", 14000)),
     }

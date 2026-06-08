@@ -3,27 +3,19 @@
 # ─────────────────────────────────────────────────────────────
 # Set provider to: local | anthropic | openai | gemini | groq
 #
-# parser  = lightweight model used to NAME csv sections
-# insight = stronger model used to ANALYSE and REPORT
+# Pandas parses the CSV and computes metrics locally.
+# insight = one LLM call used to interpret the metrics and write the report.
 # ─────────────────────────────────────────────────────────────
-
-parser:
-  provider: local
-  model: "./models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
-  max_tokens: 15
-  temperature: 0.0
-  n_ctx: 2048
 
 insight:
   provider: groq              # switch to: local | anthropic | openai | gemini | groq
   model: llama-3.3-70b-versatile   # optional; defaults per provider if omitted
   api_key_env: GROQ_API_KEY        # optional; defaults per provider if omitted
-  section_max_tokens: 200
-  max_tokens: 800             # final report length
+  max_tokens: 1000            # final report length
   temperature: 0.1
-  request_delay_seconds: 0
   max_retries: 3
   retry_base_delay_seconds: 30
+  max_prompt_chars: 14000     # keep Groq free-tier requests under TPM limits
 
 # ── Local model options ────────────────────────────────────────
 # provider: local

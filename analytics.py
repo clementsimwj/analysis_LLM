@@ -7,9 +7,9 @@ Usage:
 
 Pipeline:
     1. Load config.yaml
-    2. Build parser + insight providers from config
-    3. csv_parser: detect & label CSV sections
-    4. insights:   analyse each section + generate final report
+    2. Build deterministic metrics with Pandas
+    3. Send one compact analytics brief to the insight provider
+    4. Print the final report
 """
 import sys
 from app_config import (
@@ -20,8 +20,8 @@ from app_config import (
     runtime_options,
 )
 from providers import build_provider
-import csv_parser
 import insights
+import metrics
 
 def main():
     args = sys.argv[1:]
@@ -46,54 +46,33 @@ def main():
     config = load_config(config_path)
     load_dotenv(config.get("env_file", ".env"))
 
-    parser_cfg  = config.get("parser",  {})
     insight_cfg = config.get("insight", {})
-    parser_options = completion_options(
-        parser_cfg,
-        default_max_tokens=15,
-        default_temperature=0.0,
-    )
-    section_options = completion_options(
-        insight_cfg,
-        default_max_tokens=200,
-        default_temperature=0.1,
-        max_tokens_key="section_max_tokens",
-    )
     report_options = completion_options(
         insight_cfg,
         default_max_tokens=800,
         default_temperature=0.1,
     )
     insight_runtime_options = runtime_options(insight_cfg)
-
-    print(f"[config] Parser  provider : {parser_cfg.get('provider')} / {parser_cfg.get('model')}")
     print(f"[config] Insight provider : {insight_cfg.get('provider')} / {insight_cfg.get('model')}\n")
 
-    parser_provider = build_provider(parser_cfg)
+    # ── Step 1: Obtain Metrics ─────────────────────────────────────
+    print("STEP 1 — Computing metrics\n" + "-" * 30)
 
-    # ── Step 1: Parse CSV ─────────────────────────────────────
-    print("STEP 1 — Parsing CSV\n" + "-" * 30)
-    csv_parser.init(parser_provider, parser_options)
-    sections = csv_parser.parse(filepath)
-
-    if not sections:
-        print("[ERROR] No sections found.")
-        sys.exit(1)
+    sections = metrics.load_df(filepath)
+    metric_data = metrics.build_metrics(sections)
 
     # ── Step 2: Analyse sections ──────────────────────────────
-    print("STEP 2 — Analysing sections\n" + "-" * 30)
+    print("STEP 2 — LLM analysis\n" + "-" * 30)
+
     insight_provider = build_provider(insight_cfg)
-    insights.init(
-        insight_provider,
-        section_options,
-        report_options,
-        insight_runtime_options,
-    )
-    section_insights = insights.analyse_all(sections)
+
+    insights.init(insight_provider, report_options, insight_runtime_options)
+    report = insights.analyse(metric_data)
 
     # ── Step 3: Final report ──────────────────────────────────
-    print("STEP 3 — Generating report\n" + "-" * 30)
-    insights.generate_report(section_insights)
+    print("STEP 3 — Report\n" + "-" * 30)
+
+    print(report)
 
 if __name__ == "__main__":
     main()
